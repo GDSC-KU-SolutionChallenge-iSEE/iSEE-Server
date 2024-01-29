@@ -4,9 +4,10 @@ Server application for **iSee** project, attending [GoogleSolutionChallenge2024]
 iSee aims to provide visual assitance for individuals with visual impairments. 
 
 ## TL;DR
+### isee-stream-server
 ```bash
-docker build . -t isee-server:v0.1
-docker run 
+docker build -f docker/Dockerfile.stream.prod -t isee-stream-server:v0.1 .
+docker -p 9000:9000 run 
 ```
 
 ## Build from source
@@ -19,8 +20,14 @@ docker run
 ```bash
 git clone https://github.com/GDSC-KU-SolutionChallenge-iSEE/iSEE-Server.git
 
-cd iSEE-Server
+cd iSEE-Server/isee-stream-server
 
 cargo run
+```
+
+## Development
+```bash
+# isee-stream-server
+cargo watch -c -x run
 ```
 

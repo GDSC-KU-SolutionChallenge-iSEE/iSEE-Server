@@ -1,0 +1,18 @@
+# Use the official Rust image from the Docker Hub
+FROM rust:1.75-alpine as builder
+
+WORKDIR /app
+
+RUN apk update && apk add --no-cache musl-dev
+
+COPY isee-stream-server/ .
+
+RUN cargo install --path . 
+
+FROM alpine:latest
+
+RUN apt-get update & rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /app/target/release/isee-stream-server /usr/local/bin/isee-stream-server
+
+CMD ["isee-stream-server"]
