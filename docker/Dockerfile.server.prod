@@ -4,15 +4,20 @@ WORKDIR /app
 
 COPY isee-server/ ./
 
+RUN npm install -g dotenv-cli
 RUN npm install
+RUN npx prisma generate
 RUN npm run build && rm -rf node_modules && npm install --production
 
 FROM node:20-alpine3.18 as runner
 
+ENV NODE_ENV prod
+
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/.prod.env ./.dev.env
+COPY --from=builder /app/.prod.env ./.prod.env
 
 EXPOSE $PORT
+
 CMD ["npm", "run", "start:prod"]
