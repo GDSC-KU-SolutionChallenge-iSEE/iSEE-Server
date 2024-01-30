@@ -20,7 +20,7 @@ export class UsersService {
     return DefaultDto.of<UserDto[]>(true, 'Found Users', users.map(UserDto.of));
   }
 
-  async getUserById(user_id: string): Promise<DefaultDto<UserDto>> {
+  async getUserById(user_id: string): Promise<DefaultDto<UserDto[]>> {
     const users = await this.prisma.users.findMany({
       where: {
         user_id,
@@ -28,12 +28,12 @@ export class UsersService {
       },
     });
     if (users.length === 0) {
-      return DefaultDto.of<UserDto>(false, 'Found No User', null);
+      return DefaultDto.of<UserDto[]>(false, 'Found No User', null);
     }
-    return DefaultDto.of<UserDto>(true, 'Found User', users.map(UserDto.of)[0]);
+    return DefaultDto.of<UserDto[]>(true, 'Found User', users.map(UserDto.of));
   }
 
-  async createUser(user_id: string): Promise<DefaultDto<UserDto>> {
+  async createUser(user_id: string): Promise<DefaultDto<UserDto[]>> {
     const duplicate_users = await this.prisma.users.findMany({
       where: {
         user_id: user_id,
@@ -48,10 +48,10 @@ export class UsersService {
         user_id: user_id,
       },
     });
-    return DefaultDto.of<UserDto>(true, 'Created User', UserDto.of(user));
+    return DefaultDto.of<UserDto[]>(true, 'Created User', [UserDto.of(user)]);
   }
 
-  async deleteUserById(user_id: string): Promise<DefaultDto<UserDto>> {
+  async deleteUserById(user_id: string): Promise<DefaultDto<UserDto[]>> {
     const duplicate_users = await this.prisma.users.findMany({
       where: {
         user_id: user_id,
@@ -61,7 +61,7 @@ export class UsersService {
     if (duplicate_users.length === 0) {
       throw new NotFoundException('User not found');
     }
-    const users = await this.prisma.users.updateMany({
+    await this.prisma.users.updateMany({
       where: {
         user_id,
         deletedAt: null,
@@ -70,6 +70,6 @@ export class UsersService {
         deletedAt: new Date(),
       },
     });
-    return DefaultDto.of<UserDto>(true, 'Deleted User', UserDto.of(users[0]));
+    return DefaultDto.of<UserDto[]>(true, 'Deleted User', []);
   }
 }

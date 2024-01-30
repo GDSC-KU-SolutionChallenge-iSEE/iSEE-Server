@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { withBaseResponse } from 'src/common/dto/deafult.dto';
 
 export type UserData = {
   id: number;
@@ -18,3 +19,5 @@ export class UserDto {
     };
   }
 }
+
+export class ResponseUserDto extends withBaseResponse(UserDto, {}) {}
