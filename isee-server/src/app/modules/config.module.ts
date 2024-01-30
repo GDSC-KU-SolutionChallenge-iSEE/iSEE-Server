@@ -21,5 +21,6 @@ export const configModule = ConfigModule.forRoot({
     FIREBASE_AUTH_CERT_URL: Joi.string().required(),
     FIREBASE_CLIENT_CERT_URL: Joi.string().required(),
     FIREBASE_UNIVERSAL_DOMAIN: Joi.string().required(),
+    TOKEN_CACHE_TTL: Joi.number().required(),
   }),
 });
