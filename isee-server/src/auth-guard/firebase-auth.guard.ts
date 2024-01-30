@@ -20,7 +20,8 @@ export class FirebaseAuthGuard implements CanActivate {
 
     try {
       const decodedToken = await this.firebaseService.verifyToken(token);
-      request.user = decodedToken;
+      request.user_id = decodedToken.uid;
+      // @@@ TODO: DB user create
       return true;
     } catch (error) {
       return false;
