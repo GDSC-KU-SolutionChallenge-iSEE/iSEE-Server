@@ -26,14 +26,15 @@ export class FirebaseAuthGuard implements CanActivate {
     }
 
     const cacheKey = `firebase-token:${token}`;
-    const cachedValue = await this.cacheManager.get<number>(cacheKey);
-    // console.log('cachedValue:', cachedValue, cacheKey);
-    if (cachedValue && FirebaseAuthGuard.checkExpiration(cachedValue)) {
-      request.user_id = cachedValue;
-      return true;
-    } else if (cachedValue) {
-      this.cacheManager.del(cacheKey);
-    } else {
+    const cachedValue = await this.cacheManager.get<string>(cacheKey);
+    if (typeof cachedValue === 'string') {
+      const parsedCache = FirebaseAuthGuard.parseCache(cachedValue);
+      if (FirebaseAuthGuard.checkExpiration(parsedCache.exp)) {
+        request.user_id = parsedCache.user_id;
+        return true;
+      } else {
+        this.cacheManager.del(cacheKey);
+      }
     }
 
     try {
@@ -54,6 +55,20 @@ export class FirebaseAuthGuard implements CanActivate {
       return authHeader.split(' ')[1];
     }
     return null;
+  }
+
+  private static parseCache(
+    input_cache: string,
+  ): { exp: number; user_id: string } | null {
+    const parts = input_cache.split('::');
+
+    if (parts.length === 2) {
+      const exp = parseInt(parts[0], 10);
+
+      if (!isNaN(exp)) {
+        return { exp, user_id: parts[1] };
+      }
+    }
   }
 
   private static checkExpiration(inputTime?: number): boolean {
