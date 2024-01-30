@@ -6,6 +6,7 @@ import { CommonModule } from 'src/common/common.module';
 import { configModule } from './modules/config.module';
 import { FirebaseModule } from 'src/firebase/firebase.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { BusImageModule } from 'src/bus-image/bus-image.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     CacheModule.register({ isGlobal: true }),
     CommonModule,
     UsersModule,
+    BusImageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
