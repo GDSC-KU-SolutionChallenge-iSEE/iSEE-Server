@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { DefaultDto } from 'src/common/dto/deafult.dto';
 
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'Hello World!';
+  getHealth(): DefaultDto<null> {
+    return DefaultDto.of<null>(true, 'iSEE Server is running', null);
   }
 }
