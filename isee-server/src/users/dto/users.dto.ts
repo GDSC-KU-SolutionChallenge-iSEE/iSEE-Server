@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
 import { withBaseResponse } from 'src/common/dto/deafult.dto';
 
 export type UserData = {
@@ -11,6 +12,7 @@ export class UserDto {
     type: String,
     description: 'Firebase User Id',
   })
+  @IsString()
   user_id: string;
 
   static of(data?: UserData): UserDto {
