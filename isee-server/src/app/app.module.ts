@@ -8,6 +8,7 @@ import { FirebaseModule } from 'src/firebase/firebase.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { BusImageModule } from 'src/bus-image/bus-image.module';
 import { BusNodeModule } from 'src/bus-node/bus-node.module';
+import { BusRouteModule } from 'src/bus-route/bus-route.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { BusNodeModule } from 'src/bus-node/bus-node.module';
     UsersModule,
     BusImageModule,
     BusNodeModule,
+    BusRouteModule,
   ],
   controllers: [AppController],
   providers: [AppService],
