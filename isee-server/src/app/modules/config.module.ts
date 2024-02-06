@@ -22,5 +22,7 @@ export const configModule = ConfigModule.forRoot({
     FIREBASE_CLIENT_CERT_URL: Joi.string().required(),
     FIREBASE_UNIVERSAL_DOMAIN: Joi.string().required(),
     TOKEN_CACHE_TTL: Joi.number().required(),
+    SEOUL_NODE: Joi.string().required(),
+    SEOUL_ROUTE: Joi.string().required(),
   }),
 });
