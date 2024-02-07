@@ -24,5 +24,6 @@ export const configModule = ConfigModule.forRoot({
     TOKEN_CACHE_TTL: Joi.number().required(),
     SEOUL_NODE: Joi.string().required(),
     SEOUL_ROUTE: Joi.string().required(),
+    DATA_GOV_API_KEY: Joi.string().required(),
   }),
 });
