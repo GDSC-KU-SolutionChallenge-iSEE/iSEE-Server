@@ -1,4 +1,4 @@
-# iSee-Server
+****# iSee-Server
 Server application for **iSee** project, attending [GoogleSolutionChallenge2024](https://developers.google.com/community/gdsc-solution-challenge). 
 
 iSee aims to provide visual assitance for individuals with visual impairments. 
@@ -24,6 +24,7 @@ docker -p 9000:9000 run
 - `isee-server`
   - DB setup required for [prisma](https://www.prisma.io/)
   - `.env` configuration as `isee-server/.env.example`
+  - Bus config : `config/*.json` required
   
 ### 1. Build&Run
 ### isee-server
