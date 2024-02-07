@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Controller,
   Get,
+  Param,
   Query,
   UseGuards,
   ValidationPipe,
@@ -20,11 +21,31 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { FirebaseAuthGuard } from 'src/auth-guard/firebase-auth.guard';
+import {
+  ResponseBusRouteArriveDto,
+  RouteArrivalDto,
+} from './dto/bus-node.api.dto';
 
 @Controller('nodes')
 @ApiTags('Bus-Node API')
 export class BusNodeController {
   constructor(private readonly busNodeService: BusNodeService) {}
+
+  @Get('route-list/:node_id')
+  @UseGuards(FirebaseAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '버스정류소의 노선별 도착정보를 조회합니다.' })
+  @ApiCreatedResponse({ type: ResponseBusRouteArriveDto })
+  async getRouteListByNodeId(
+    @Param('node_id') node_id: string,
+  ): Promise<DefaultDto<RouteArrivalDto[]>> {
+    const result = await this.busNodeService.getRouteListByNodeId(node_id);
+    return DefaultDto.of<RouteArrivalDto[]>(
+      true,
+      `Found routes in node: ${node_id}`,
+      result,
+    );
+  }
 
   @Get('search')
   @UseGuards(FirebaseAuthGuard)

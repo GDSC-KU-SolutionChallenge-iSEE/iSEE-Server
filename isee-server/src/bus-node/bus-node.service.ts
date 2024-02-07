@@ -1,23 +1,46 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
-import { BusNodeDto } from './dto/bus-node.dto';
+import { BusNodeDto, BusNodeType } from './dto/bus-node.dto';
+import { HttpService } from '@nestjs/axios';
+import { UtilService } from 'src/common/utils/util.service';
+import { catchError, firstValueFrom } from 'rxjs';
+import {
+  ApiResponseDto,
+  RouteArrivalDto,
+  getStationByUidItem,
+} from './dto/bus-node.api.dto';
+import { AxiosError } from 'axios';
 
 @Injectable()
 export class BusNodeService implements OnModuleInit {
   BusNodes: BusNodeDto[] = [];
-  constructor(private configService: ConfigService) {}
+  BusNodesHashMap: Map<string, BusNodeType> = new Map();
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly httpService: HttpService,
+    private readonly utilService: UtilService,
+  ) {}
 
   onModuleInit() {
     const node_json_path = this.configService.get('SEOUL_NODE');
     const buffer = fs.readFileSync(node_json_path);
     const jsonString = buffer.toString();
-    this.BusNodes = JSON.parse(jsonString).map(BusNodeDto.of);
+    const tmp = JSON.parse(jsonString);
+    this.BusNodes = tmp.map(BusNodeDto.of);
+    for (const busNode of tmp) {
+      this.BusNodesHashMap.set(String(busNode.node_id), busNode);
+    }
   }
 
   getAllBusNode(): BusNodeDto[] {
     return this.BusNodes;
   }
+
   searchBusNodeByName(name: string): BusNodeDto[] {
     const searchResults: BusNodeDto[] = [];
     for (const busNode of this.BusNodes) {
@@ -51,6 +74,28 @@ export class BusNodeService implements OnModuleInit {
 
     return nearestNodes;
   }
+
+  async getRouteListByNodeId(node_id: string): Promise<RouteArrivalDto[]> {
+    const ars_id = this.BusNodesHashMap.get(node_id).ars_id;
+    const api_params: Map<string, string> = new Map([
+      ['arsId', String(ars_id)],
+      ['resultType', 'json'],
+    ]);
+    const base_url = 'http://ws.bus.go.kr/api/rest/stationinfo/getStationByUid';
+    const url = this.utilService.buildApiUrl(base_url, api_params);
+    const { data } = await firstValueFrom(
+      this.httpService.get<ApiResponseDto<getStationByUidItem>>(url).pipe(
+        catchError((error: AxiosError) => {
+          console.error(error.response.data);
+          throw new InternalServerErrorException(
+            'Failed to get route list by node ID from the server.',
+          );
+        }),
+      ),
+    );
+    return data.msgBody.itemList.map(getStationByUidItem.of);
+  }
+
   private getDistanceByLongLat(
     lat1: number,
     lat2: number,
