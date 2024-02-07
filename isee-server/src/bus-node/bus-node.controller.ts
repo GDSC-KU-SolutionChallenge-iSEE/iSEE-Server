@@ -23,7 +23,9 @@ import {
 import { FirebaseAuthGuard } from 'src/auth-guard/firebase-auth.guard';
 import {
   ResponseBusRouteArriveDto,
+  ResponseBusRouteInfoDto,
   RouteArrivalDto,
+  RouteInfoDto,
 } from './dto/bus-node.api.dto';
 
 @Controller('nodes')
@@ -31,18 +33,35 @@ import {
 export class BusNodeController {
   constructor(private readonly busNodeService: BusNodeService) {}
 
-  @Get('route-list/:node_id')
+  @Get('route/:node_id')
   @UseGuards(FirebaseAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: '버스정류소의 노선별 도착정보를 조회합니다.' })
-  @ApiCreatedResponse({ type: ResponseBusRouteArriveDto })
+  @ApiOperation({ summary: '버스정류소의 노선 목록를 조회합니다.' })
+  @ApiCreatedResponse({ type: ResponseBusRouteInfoDto })
   async getRouteListByNodeId(
     @Param('node_id') node_id: string,
-  ): Promise<DefaultDto<RouteArrivalDto[]>> {
+  ): Promise<DefaultDto<RouteInfoDto[]>> {
     const result = await this.busNodeService.getRouteListByNodeId(node_id);
-    return DefaultDto.of<RouteArrivalDto[]>(
+    return DefaultDto.of<RouteInfoDto[]>(
       true,
       `Found routes in node: ${node_id}`,
+      result,
+    );
+  }
+
+  @Get('route/arrive/:node_id')
+  @UseGuards(FirebaseAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '버스정류소의 실시간 노선 도착정보를 조회합니다.' })
+  @ApiCreatedResponse({ type: ResponseBusRouteArriveDto })
+  async getRouteArriveListByNodeId(
+    @Param('node_id') node_id: string,
+  ): Promise<DefaultDto<RouteArrivalDto[]>> {
+    const result =
+      await this.busNodeService.getRouteArriveListByNodeId(node_id);
+    return DefaultDto.of<RouteArrivalDto[]>(
+      true,
+      `Found route arrival info in node: ${node_id}`,
       result,
     );
   }

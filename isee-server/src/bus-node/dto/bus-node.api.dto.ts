@@ -26,6 +26,49 @@ export class MsgBody<T> {
   itemList: T[];
 }
 
+export class getRouteByStationItem {
+  busRouteId: string;
+  busRouteNm: string;
+  busRouteAbrv: string;
+  length: string;
+  busRouteType: string;
+  stBegin: string;
+  stEnd: string;
+  term: string;
+  nextBus: string;
+  firstBusTm: string;
+  lastBusTm: string;
+  firstBusTmLow: string;
+  lastBusTmLow: string;
+
+  static of(item: getRouteByStationItem): RouteInfoDto {
+    return {
+      route_id: item.busRouteId,
+      route_name: item.busRouteNm,
+      term: Number(item.term),
+    };
+  }
+}
+
+export class RouteInfoDto {
+  @ApiProperty({
+    type: String,
+    description: '버스 노선 id',
+  })
+  route_id: string;
+
+  @ApiProperty({
+    type: String,
+    description: '버스 노선 이름',
+  })
+  route_name: string;
+  @ApiProperty({
+    type: String,
+    description: '버스 배차 간격(분)',
+  })
+  term: number;
+}
+
 export class RouteArrivalDto {
   @ApiProperty({
     type: String,
@@ -140,5 +183,10 @@ export class getStationByUidItem {
 
 export class ResponseBusRouteArriveDto extends withBaseResponse(
   RouteArrivalDto,
+  {},
+) {}
+
+export class ResponseBusRouteInfoDto extends withBaseResponse(
+  RouteInfoDto,
   {},
 ) {}

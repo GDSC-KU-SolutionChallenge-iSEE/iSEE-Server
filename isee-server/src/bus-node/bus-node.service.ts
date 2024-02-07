@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   OnModuleInit,
@@ -12,6 +13,7 @@ import { catchError, firstValueFrom } from 'rxjs';
 import {
   ApiResponseDto,
   RouteArrivalDto,
+  getRouteByStationItem,
   getStationByUidItem,
 } from './dto/bus-node.api.dto';
 import { AxiosError } from 'axios';
@@ -75,8 +77,36 @@ export class BusNodeService implements OnModuleInit {
     return nearestNodes;
   }
 
-  async getRouteListByNodeId(node_id: string): Promise<RouteArrivalDto[]> {
-    const ars_id = this.BusNodesHashMap.get(node_id).ars_id;
+  async getRouteListByNodeId(node_id: string) {
+    const busNode = this.BusNodesHashMap.get(node_id);
+    if (!busNode) throw new BadRequestException('Bus node not found');
+    const ars_id = busNode.ars_id;
+    const api_params: Map<string, string> = new Map([
+      ['arsId', String(ars_id)],
+      ['resultType', 'json'],
+    ]);
+    const base_url =
+      'http://ws.bus.go.kr/api/rest/stationinfo/getRouteByStation';
+    const url = this.utilService.buildApiUrl(base_url, api_params);
+    const { data } = await firstValueFrom(
+      this.httpService.get<ApiResponseDto<getRouteByStationItem>>(url).pipe(
+        catchError((error: AxiosError) => {
+          console.error(error.response.data);
+          throw new InternalServerErrorException(
+            'Failed to get route list by node ID from the server.',
+          );
+        }),
+      ),
+    );
+    return data.msgBody.itemList.map(getRouteByStationItem.of);
+  }
+
+  async getRouteArriveListByNodeId(
+    node_id: string,
+  ): Promise<RouteArrivalDto[]> {
+    const busNode = this.BusNodesHashMap.get(node_id);
+    if (!busNode) throw new BadRequestException('Bus node not found');
+    const ars_id = busNode.ars_id;
     const api_params: Map<string, string> = new Map([
       ['arsId', String(ars_id)],
       ['resultType', 'json'],
@@ -88,7 +118,7 @@ export class BusNodeService implements OnModuleInit {
         catchError((error: AxiosError) => {
           console.error(error.response.data);
           throw new InternalServerErrorException(
-            'Failed to get route list by node ID from the server.',
+            'Failed to get route arrival list by node ID from the server.',
           );
         }),
       ),
