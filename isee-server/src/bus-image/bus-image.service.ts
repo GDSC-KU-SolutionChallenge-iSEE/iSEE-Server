@@ -1,32 +1,48 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { DefaultDto } from 'src/common/dto/deafult.dto';
-import { BusImageResultDto } from './dto/bus-image.result.dto';
+import {
+  BusImageResultCliDto,
+  BusImageResultDto,
+} from './dto/bus-image.result.dto';
+import { catchError, firstValueFrom } from 'rxjs';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
+import { AxiosError } from 'axios';
+import { BusImageDto } from './dto/bus-image.dto';
 
 @Injectable()
 export class BusImageService {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  uploadImage(image: string): DefaultDto<BusImageResultDto> {
-    const randomNum = Math.floor(Math.random() * 6);
+  constructor(
+    private httpService: HttpService,
+    private configService: ConfigService,
+  ) {}
 
-    const result: string[] = [];
-
-    for (let i: number = 0; i < randomNum + 1; i += 1) {
-      const randomLength = Math.floor(Math.random() * 5 + 1);
-      const charset = 'ABCD0123456789';
-      let tmp_string = '';
-      for (let i = 0; i < randomLength; i++) {
-        const randomIndex = Math.floor(Math.random() * charset.length);
-        tmp_string += charset.charAt(randomIndex);
-      }
-      result.push(tmp_string);
-    }
-
-    // Repeat the random string the number of times specified by the random number
-
-    return DefaultDto.of<BusImageResultDto>(
+  async uploadImage(
+    image_string: string,
+  ): Promise<DefaultDto<BusImageResultCliDto>> {
+    let result: string[] = [];
+    const AI_URL: string = this.configService.get('AI_URL');
+    const { data } = await firstValueFrom(
+      this.httpService
+        .post<BusImageResultDto>(AI_URL, BusImageDto.of(image_string), {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        .pipe(
+          catchError((error: AxiosError) => {
+            console.error(error.response);
+            throw new InternalServerErrorException(
+              'Failed to retrieve route info by image from the ai-server.',
+            );
+          }),
+        ),
+    );
+    result = data.result; // TODO : Filter by bus number
+    return DefaultDto.of<BusImageResultCliDto>(
       true,
       '',
-      BusImageResultDto.of(result),
+      BusImageResultCliDto.of(result),
     );
   }
 }

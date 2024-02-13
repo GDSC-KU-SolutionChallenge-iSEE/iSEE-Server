@@ -25,5 +25,6 @@ export const configModule = ConfigModule.forRoot({
     SEOUL_NODE: Joi.string().required(),
     SEOUL_ROUTE: Joi.string().required(),
     DATA_GOV_API_KEY: Joi.string().required(),
+    AI_URL: Joi.string().required(),
   }),
 });
