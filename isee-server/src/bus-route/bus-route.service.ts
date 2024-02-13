@@ -6,6 +6,7 @@ import * as fs from 'fs';
 @Injectable()
 export class BusRouteService implements OnModuleInit {
   BusRoutes: BusRouteDto[] = [];
+  BusRouteSet: Set<string> = new Set<string>();
   constructor(private configService: ConfigService) {}
 
   onModuleInit() {
@@ -13,6 +14,9 @@ export class BusRouteService implements OnModuleInit {
     const buffer = fs.readFileSync(node_json_path);
     const jsonString = buffer.toString();
     this.BusRoutes = JSON.parse(jsonString).map(BusRouteDto.of);
+    this.BusRoutes.forEach((route) => {
+      this.BusRouteSet.add(route.route_name);
+    });
   }
 
   getAllBusRoute(): BusRouteDto[] {

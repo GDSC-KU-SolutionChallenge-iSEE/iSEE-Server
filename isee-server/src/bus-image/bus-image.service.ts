@@ -9,14 +9,25 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { AxiosError } from 'axios';
 import { BusImageDto } from './dto/bus-image.dto';
+import { BusRouteService } from 'src/bus-route/bus-route.service';
 
 @Injectable()
 export class BusImageService {
   constructor(
     private httpService: HttpService,
     private configService: ConfigService,
+    private busRouteService: BusRouteService,
   ) {}
 
+  filterBus(bus_ids: string[]): string[] {
+    const result: string[] = [];
+    for (const busId of bus_ids) {
+      if (this.busRouteService.BusRouteSet.has(busId)) {
+        result.push(busId);
+      }
+    }
+    return result;
+  }
   async uploadImage(
     image_string: string,
   ): Promise<DefaultDto<BusImageResultCliDto>> {
@@ -38,10 +49,11 @@ export class BusImageService {
           }),
         ),
     );
-    result = data.result; // TODO : Filter by bus number
+    result = this.filterBus(data.result); // TODO : Filter by bus number
+    console.log('Detected:', data.result, 'Filtered:', result);
     return DefaultDto.of<BusImageResultCliDto>(
       true,
-      '',
+      'Bus route names detected from the image.',
       BusImageResultCliDto.of(result),
     );
   }
